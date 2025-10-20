@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+.tippy-box[data-theme~='simple'] {
+  background: #374151;
+  color: white;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tippy-box[data-theme~='simple'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #374151;
+}
+
+.tippy-box[data-theme~='simple'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #374151;
+}
+
+.tippy-box[data-theme~='simple'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #374151;
+}
+
+.tippy-box[data-theme~='simple'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #374151;
+}
+
+.custom-toast {
+  font-size: 14px !important;
+  min-height: 50px !important;
+}
+
+.custom-toast .Vue-Toastification__toast-body {
+  font-size: 14px !important;
+}
