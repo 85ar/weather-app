@@ -14,7 +14,7 @@
 
       <div class="text-center flex items-center">
         <img :src="`https:${current.condition.icon}`" />
-        <p class="text-xs font-semibold">{{ current.condition.text }}</p>
+        <p class="ml-2 text-gray-700 font-medium">{{ current.condition.text }}</p>
       </div>
     </div>
 
