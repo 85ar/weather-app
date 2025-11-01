@@ -1,7 +1,10 @@
 <template>
-  <div>Map</div>
+  <MapComponent />
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import MapComponent from '../components/MapComponent.vue';
+
+</script>
 
 <style scoped></style>

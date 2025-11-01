@@ -7,7 +7,7 @@
           v-for="item in forecast.forecastday"
           :key="item.date"
           class="rounded-2xl shadow-lg p-4 border border-gray-100 w-80 hover:bg-blue-100 hover:cursor-pointer transition"
-          :class="activeDay === item.date ? 'bg-blue-100 text-white' : 'bg-white text-gray-800'"
+          :class="activeDay === item.date ? 'bg-gray-200 text-white' : 'bg-white text-gray-800'"
           @click="handleClick(item.date)"
         >
           <div class="flex items-center gap-2 mb-2">

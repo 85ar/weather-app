@@ -14,3 +14,8 @@ export const getForecastWeatherByCoords = async (latitude: number, longitude: nu
   )
   return result.data
 }
+
+export const getCityBySearch = async (search: string) => {
+  const result = await axios.get(`${API_URL}/search.json?key=${API_KEY}&q=${search}`)
+  return result.data
+}

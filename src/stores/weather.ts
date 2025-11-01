@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getForecastWeatherByCity, getForecastWeatherByCoords } from '../api/service'
+import {
+  getCityBySearch,
+  getForecastWeatherByCity,
+  getForecastWeatherByCoords,
+} from '../api/service'
 
 export interface Location {
   name: string
@@ -15,6 +19,12 @@ export interface Location {
 export interface ConditionData {
   text: string
   icon: string
+}
+
+export interface CityOptions {
+  id: number
+  name: string
+  country: string
 }
 
 export interface Current {
@@ -61,6 +71,7 @@ export interface HourData {
 
 export const useWeatherStore = defineStore('weather', () => {
   const city = ref<string>('')
+  const citiesOptions = ref<CityOptions[]>([])
   const current = ref<Current>({} as Current)
   const forecast = ref<Forecast>({} as Forecast)
   const location = ref<Location>({} as Location)
@@ -76,6 +87,7 @@ export const useWeatherStore = defineStore('weather', () => {
 
   const fetchForecastWeatherByCity = async () => {
     loading.value = true
+    clearData()
     try {
       const result = await getForecastWeatherByCity(city.value)
       city.value = result.location.name
@@ -107,9 +119,26 @@ export const useWeatherStore = defineStore('weather', () => {
     }
   }
 
+  const fetchCityBySearch = async (search: string) => {
+    try {
+      const result = await getCityBySearch(search)
+      citiesOptions.value = result
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const clearData = () => {
+    current.value = {} as Current
+    forecast.value = {} as Forecast
+    location.value = {} as Location
+  }
+
   return {
     fetchForecastWeatherByCity,
     fetchForecastWeatherByCoords,
+    fetchCityBySearch,
+    citiesOptions,
     city,
     current,
     forecast,
@@ -117,5 +146,6 @@ export const useWeatherStore = defineStore('weather', () => {
     loading,
     activeDay,
     setActiveDay,
+    clearData,
   }
 })
