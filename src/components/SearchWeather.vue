@@ -13,7 +13,7 @@
         />
         <ul
           v-if="showOptions && citiesOptions.length"
-          class="absolute z-10 w-full bg-white border border-t-0 rounded-b shadow mt-0"
+          class="absolute z-10 w-full bg-white border border-t-0 border-gray-300 rounded-b shadow mt-0"
         >
           <li
             v-for="(item, index) in citiesOptions"
@@ -28,6 +28,8 @@
             {{ item.name }} ({{ item.country }})
           </li>
         </ul>
+        <span v-if="loadingOptions" class="loader absolute right-4 top-2"></span>
+
         <button
           v-if="city"
           @click="resetInput"
@@ -58,15 +60,20 @@
         <Navigation class="w-4 h-4" />
         <span>{{ isDetectingLocation ? '...' : 'Авто' }}</span>
       </button>
+
       <button
-        class="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg hover:bg-gray-400 transition cursor-pointer flex items-center gap-2"
+        v-if="city"
+        @click="addFavoriteCity()"
+        class="px-4 py-2 text-gray-500 rounded-lg hover:bg-green-600 transition cursor-pointer flex items-center gap-2"
+        :class="isFavorite ? 'bg-green-500 text-white' : 'bg-gray-300 '"
         v-tippy="{
-          content: 'Добавить город в Избранное',
+          content: isFavorite ? 'Город в Избранном' : 'Добавить город в Избранное',
           placement: 'top',
         }"
       >
         <Heart class="w-4 h-4" />
       </button>
+
       <button
         class="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg hover:bg-gray-400 transition cursor-pointer flex items-center gap-2"
       >
@@ -83,15 +90,23 @@ import { X, Navigation, Heart, User } from 'lucide-vue-next'
 import { useDetectLocation } from '../composable/useDetectLocation'
 import { useToast } from 'vue-toastification'
 import { ref } from 'vue'
+import { useFavorites } from '../composable/useFavorites'
 
 const store = useWeatherStore()
 
-const letter = ref<string>('')
 const highlightedIndex = ref(-1)
 
 const showOptions = ref(false)
 
-const { city, activeDay, citiesOptions } = storeToRefs(store)
+const { city, activeDay, citiesOptions, loadingOptions } = storeToRefs(store)
+
+const { getLocation, isSupportedLocation, isDetectingLocation, locationError, isSuccessDetecting } =
+  useDetectLocation()
+
+const { isFavorite, add } = useFavorites()
+
+const letter = ref<string>(city.value)
+
 const toast = useToast()
 
 // поиск погоды
@@ -114,9 +129,6 @@ const resetInput = () => {
   citiesOptions.value = []
   letter.value = ''
 }
-
-const { getLocation, isSupportedLocation, isDetectingLocation, locationError, isSuccessDetecting } =
-  useDetectLocation()
 
 // определяем местоположение
 const detectLocation = async () => {
@@ -170,6 +182,34 @@ const handleKeydown = (e: KeyboardEvent) => {
       break
   }
 }
+const addFavoriteCity = () => {
+  if (isFavorite.value) {
+    toast.info('Город уже находится в Избранном')
+  } else {
+    add()
+    toast.success('Город добавлен в Избранное')
+  }
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.loader {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #ff8904;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>

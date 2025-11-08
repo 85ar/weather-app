@@ -14,3 +14,6 @@ export const formatDate = (timeString: string) => {
     minute: '2-digit',
   })
 }
+
+// км/ч в м/с и округление
+export const formatSpeed = (value: number) => Math.round(value / 3.6)

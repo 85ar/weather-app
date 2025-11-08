@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import {
   getCityBySearch,
   getForecastWeatherByCity,
@@ -69,6 +69,19 @@ export interface HourData {
   pressure_mb: number
 }
 
+export interface FavoriteCity {
+  id: string
+  name: string
+  country: string
+  lat: number
+  lon: number
+  temp_c: number
+  condition: {
+    text: string
+    icon: string
+  }
+}
+
 export const useWeatherStore = defineStore('weather', () => {
   const city = ref<string>('')
   const citiesOptions = ref<CityOptions[]>([])
@@ -77,6 +90,10 @@ export const useWeatherStore = defineStore('weather', () => {
   const location = ref<Location>({} as Location)
 
   const loading = ref<boolean>(false)
+  const loadingOptions = ref<boolean>(false)
+
+  // Избранные города
+  const favorites = ref<FavoriteCity[]>([])
 
   // выбранный день прогноза
   const activeDay = ref<string>()
@@ -120,11 +137,14 @@ export const useWeatherStore = defineStore('weather', () => {
   }
 
   const fetchCityBySearch = async (search: string) => {
+    loadingOptions.value = true
     try {
       const result = await getCityBySearch(search)
       citiesOptions.value = result
     } catch (error) {
       console.error(error)
+    } finally {
+      loadingOptions.value = false
     }
   }
 
@@ -133,6 +153,34 @@ export const useWeatherStore = defineStore('weather', () => {
     forecast.value = {} as Forecast
     location.value = {} as Location
   }
+
+  // работаем с localStorage
+  const loadFavorites = () => {
+    const data = localStorage.getItem('favorite')
+    favorites.value = data ? JSON.parse(data) : []
+  }
+
+  const saveFavorites = () => {
+    localStorage.setItem('favorite', JSON.stringify(favorites.value))
+  }
+
+  const addFavorite = (city: FavoriteCity) => {
+    if (!favorites.value.some((f) => f.id === city.id)) {
+      favorites.value.push(city)
+      saveFavorites()
+    }
+  }
+
+  const removeFavorite = (id: string) => {
+    favorites.value = favorites.value.filter((f) => f.id !== id)
+    saveFavorites()
+  }
+
+  const isFavorite = computed(() => {
+    return favorites.value.some(
+      (fav) => fav.lat === location.value.lat && fav.lon === location.value.lon,
+    )
+  })
 
   return {
     fetchForecastWeatherByCity,
@@ -144,8 +192,14 @@ export const useWeatherStore = defineStore('weather', () => {
     forecast,
     location,
     loading,
+    loadingOptions,
     activeDay,
     setActiveDay,
     clearData,
+    favorites,
+    loadFavorites,
+    addFavorite,
+    removeFavorite,
+    isFavorite,
   }
 })

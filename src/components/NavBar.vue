@@ -1,69 +1,62 @@
 <template>
-  <nav class="w-68 bg-gray-100 text-gray-500 flex flex-col">
-    <div class="px-4 py-6">
-      <router-link to="/" class="flex items-center gap-2 text-blue-600">
-        <CloudSunRain class="w-8 h-8" />
-        <span class="text-lg font-semibold">Метео навигатор</span>
-      </router-link>
+  <nav
+    class="bg-white border-r border-gray-200 flex flex-col transition-all duration-300"
+    :class="isCompact ? 'w-20' : 'w-64'"
+  >
+    <div class="px-4 py-6 flex items-center gap-2">
+      <CloudSunRain class="w-8 h-8 text-blue-500" />
+      <span v-if="!isCompact" class="text-lg font-semibold text-gray-800 whitespace-nowrap">
+        Метео навигатор
+      </span>
     </div>
 
-    <div class="flex-1 p-4">
-      <ul class="space-y-4">
-        <li>
+    <div class="flex-1 px-3">
+      <ul class="space-y-2">
+        <li v-for="item in menu" :key="item.to">
           <router-link
-            to="/"
-            :class="{ 'text-blue-600': route.path === '/' }"
-            class="flex items-center gap-2 p-2 rounded hover:bg-blue-100 transition"
+            :to="item.to"
+            class="flex items-center gap-3 p-3 rounded-xl transition hover:bg-blue-50"
+            :class="[
+              route.path === item.to ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-600',
+              isCompact && 'justify-center',
+            ]"
           >
-            <House />
-            <span>Дашборд</span></router-link
-          >
-        </li>
-        <li>
-          <router-link
-            to="/map"
-            :class="{ 'text-blue-600': route.path === '/map' }"
-            class="flex items-center gap-2 p-2 rounded hover:bg-blue-100 transition"
-          >
-            <Map />
-            <span>Карта</span></router-link
-          >
-        </li>
-        <li>
-          <router-link
-            to="/location"
-            :class="{ 'text-blue-600': route.path === '/location' }"
-            class="flex items-center gap-2 p-2 rounded hover:bg-blue-100 transition"
-          >
-            <MapPinCheck />
-            <span>Моя локация</span></router-link
-          >
+            <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+            <span v-if="!isCompact" class="whitespace-nowrap">
+              {{ item.label }}
+            </span>
+          </router-link>
         </li>
       </ul>
     </div>
 
-    <div class="p-4">
-      <span>Система</span>
-      <ul class="space-y-4 mt-4">
+    <div class="px-3 pb-5">
+      <p v-if="!isCompact" class="text-xs uppercase text-gray-400 px-2 mb-3">Система</p>
+      <ul class="space-y-2">
         <li>
           <router-link
             to="/setting"
-            :class="{ 'text-blue-600': route.path === '/setting' }"
-            class="flex items-center gap-2 p-2 rounded hover:bg-blue-100 transition"
+            class="flex items-center gap-3 p-3 rounded-xl transition hover:bg-blue-50"
+            :class="[
+              route.path === '/setting'
+                ? 'bg-blue-100 text-blue-600 font-semibold'
+                : 'text-gray-600',
+              isCompact && 'justify-center',
+            ]"
           >
-            <Settings />
-            <span>Настройки</span></router-link
-          >
+            <Settings class="w-5 h-5" />
+            <span v-if="!isCompact">Настройки</span>
+          </router-link>
         </li>
-        <li
-          class="flex items-center gap-2 p-2 rounded hover:bg-blue-100 transition text-orange-400"
-        >
-          <LogOut />
+
+        <li>
           <button
-            @click="logout()"
-            class="flex items-center rounded hover:bg-blue-100 transition cursor-pointer"
+            @click="logout"
+            class="flex items-center gap-3 p-3 w-full text-left text-red-500 hover:bg-red-50 rounded-xl transition"
+            :class="[isCompact && 'justify-center']"
           >
-            Выход
+            <LogOut class="w-5 h-5" />
+            <span v-if="!isCompact">Выход</span>
           </button>
         </li>
       </ul>
@@ -73,12 +66,40 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { House, Map, Settings, LogOut, CloudSunRain, MapPinCheck } from 'lucide-vue-next'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { CloudSunRain, House, Map, MapPinCheck, BookHeart, Settings, LogOut } from 'lucide-vue-next'
 
 const route = useRoute()
+const isCompact = ref(false)
+
+const menu = [
+  { label: 'Дашборд', to: '/', icon: House },
+  { label: 'Карта', to: '/map', icon: Map },
+  { label: 'Моя локация', to: '/location', icon: MapPinCheck },
+  { label: 'Избранное', to: '/favorite', icon: BookHeart },
+]
+
 const logout = () => {
   console.log('logout')
 }
+
+// Авто-compact на малых экранах
+onMounted(() => {
+  const updateCompact = () => {
+    isCompact.value = window.innerWidth < 768
+  }
+
+  updateCompact()
+  window.addEventListener('resize', updateCompact)
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateCompact)
+  })
+})
 </script>
 
-<style scoped></style>
+<style scoped>
+nav {
+  min-height: 100vh;
+}
+</style>

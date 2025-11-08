@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../pages/HomePage.vue'
 import MapPage from '../pages/MapPage.vue'
 import SettingPage from '../pages/SettingPage.vue'
+import FavoritePage from '../pages/FavoritePage.vue'
 import LocationPage from '../pages/LocationPage.vue'
 
 const router = createRouter({
@@ -21,6 +22,11 @@ const router = createRouter({
       path: '/location',
       name: 'location',
       component: LocationPage,
+    },
+    {
+      path: '/favorite',
+      name: 'favorite',
+      component: FavoritePage,
     },
     {
       path: '/setting',
