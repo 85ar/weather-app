@@ -1,0 +1,27 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import axios from 'axios'
+
+export default async (req: VercelRequest, res: VercelResponse) => {
+  const { q, days = 3 } = req.query
+
+  if (!q) {
+    return res.status(400).json({ error: 'Missing query param "q"' })
+  }
+
+  try {
+    const response = await axios.get('https://api.weatherapi.com/v1/forecast.json', {
+      params: {
+        key: process.env.WEATHER_API_KEY,
+        q,
+        days,
+        lang: 'ru',
+      },
+    })
+
+    res.json(response.data)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error('Weather API error:', error.response?.data || error.message)
+    res.status(500).json({ error: 'Failed to fetch weather data' })
+  }
+}
