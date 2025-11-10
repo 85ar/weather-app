@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification';
 import { useFavorites } from '../composable/useFavorites'
-import { type FavoriteCity } from '../stores/weather'
+import { type FavoriteCity } from '../stores/weatherStore'
 import { MapPin, Trash2 , Globe } from 'lucide-vue-next'
 
 const toast = useToast()

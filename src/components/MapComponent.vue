@@ -1,7 +1,7 @@
 <template>
   <div class="mb-2">
     <div class="flex items-center gap-2">
-      <div v-if="city.length ">Текущий город: {{ city }}</div>
+      <div v-if="city.length">Текущий город: {{ city }}</div>
       <button
         v-if="city.length && !isFavorite"
         @click="addFavoriteCity()"
@@ -36,19 +36,23 @@
 import { nextTick, onMounted, ref } from 'vue'
 import L, { type Map as LMap } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { useWeatherStore } from '../stores/weather'
+import { useWeatherStore } from '../stores/weatherStore'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { HeartPlus } from 'lucide-vue-next'
 import { useFavorites } from '../composable/useFavorites'
 import { useToast } from 'vue-toastification'
+import { useFavoritesStore } from '../stores/favoritesStore'
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 const map = ref<LMap | null>(null)
 const route = useRoute()
 
-const store = useWeatherStore()
-const { city, location, favorites } = storeToRefs(store)
+const storeWeather = useWeatherStore()
+const { city, location } = storeToRefs(storeWeather)
+
+const storeFavorites = useFavoritesStore()
+const { favorites } = storeToRefs(storeFavorites)
 const { isFavorite, add } = useFavorites()
 const toast = useToast()
 
@@ -81,8 +85,8 @@ const focusCity = (fav: FavCity) => {
 }
 
 const addFavoriteCity = () => {
-    add()
-    toast.success('Город добавлен в Избранное')
+  add()
+  toast.success('Город добавлен в Избранное')
 }
 
 onMounted(() => {

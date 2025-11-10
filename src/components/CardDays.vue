@@ -67,17 +67,17 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useWeatherStore } from '../stores/weather'
+import { useWeatherStore } from '../stores/weatherStore'
 import { Calendar, Thermometer, Wind, CloudRain, Eye } from 'lucide-vue-next'
 import { formatSpeed } from '../tools/helper'
 
-const store = useWeatherStore()
-const { forecast, activeDay } = storeToRefs(store)
+const storeWeather = useWeatherStore()
+const { forecast, activeDay } = storeToRefs(storeWeather)
 
 const dateTransform = (date: string) => date.split('-').reverse().join('.')
 
 const handleClick = (date: string) => {
-  store.setActiveDay(date)
+  storeWeather.setActiveDay(date)
 }
 </script>
 

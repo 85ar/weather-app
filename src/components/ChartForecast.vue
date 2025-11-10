@@ -19,19 +19,28 @@ import {
   type ChartOptions,
 } from 'chart.js'
 import { computed } from 'vue'
-import { useWeatherStore } from '@/stores/weather'
+import { useWeatherStore } from '@/stores/weatherStore'
 import { storeToRefs } from 'pinia'
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, Filler)
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Filler,
+)
 
-const store = useWeatherStore()
-const { activeDay } = storeToRefs(store)
+const storeWeather = useWeatherStore()
+const { activeDay } = storeToRefs(storeWeather)
 
 // Преобразуем выбранную дату в формат API
 const filteredHours = computed(() => {
   if (!activeDay.value) return []
   const isoDate = activeDay.value.split('.').reverse().join('-')
-  const day = store.forecast.forecastday.find((item) => item.date === isoDate)
+  const day = storeWeather.forecast.forecastday.find((item) => item.date === isoDate)
   if (!day) return []
 
   return day.hour.map((h) => ({
@@ -102,18 +111,21 @@ const chartOptions: ChartOptions<'line'> = {
       title: { display: true, text: 'Время', color: '#6b7280' },
       ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 },
     },
-    y: { // Температура
+    y: {
+      // Температура
       title: { display: true, text: '°C', color: '#3b82f6' },
       beginAtZero: false,
     },
-    y1: { // Влажность
+    y1: {
+      // Влажность
       position: 'right',
       title: { display: true, text: '%', color: '#10b981' },
       grid: { drawOnChartArea: false },
       min: 0,
       max: 100,
     },
-    y2: { // Давление
+    y2: {
+      // Давление
       position: 'right',
       title: { display: true, text: 'мм рт.ст.', color: '#f97316' },
       grid: { drawOnChartArea: false },

@@ -8,15 +8,15 @@
 </template>
 <script setup lang="ts">
 import NavBar from './components/NavBar.vue'
-import { useWeatherStore } from '@/stores/weather'
 import { hideAll } from 'tippy.js'
+import { useFavoritesStore } from './stores/favoritesStore'
 
 // скрытие тултипов при скролле
 window.addEventListener('wheel', () => hideAll(), { passive: true })
 window.addEventListener('scroll', () => hideAll(), { passive: true })
 
-const store = useWeatherStore()
-store.loadFavorites()
+const storeFavorites = useFavoritesStore()
+storeFavorites.loadFavorites()
 </script>
 
 <style scoped></style>

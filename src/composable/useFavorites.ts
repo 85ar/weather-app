@@ -1,10 +1,14 @@
 import { computed } from 'vue'
-import { useWeatherStore } from '../stores/weather'
+import { useWeatherStore } from '../stores/weatherStore'
 import { storeToRefs } from 'pinia'
+import { useFavoritesStore } from '../stores/favoritesStore'
 
 export function useFavorites() {
-  const store = useWeatherStore()
-  const { favorites, current, location } = storeToRefs(store)
+  const storeWeather = useWeatherStore()
+  const storeFavorites = useFavoritesStore()
+
+  const { current, location } = storeToRefs(storeWeather)
+  const { favorites } = storeToRefs(storeFavorites)
 
   const isFavorite = computed(() => {
     return favorites.value.some(
@@ -14,7 +18,7 @@ export function useFavorites() {
 
   const add = () => {
     if (!isFavorite.value) {
-      store.addFavorite({
+      storeFavorites.addFavorite({
         id: `${location.value.lat}_${location.value.lon}`,
         name: location.value.name,
         country: location.value.country,
@@ -30,7 +34,7 @@ export function useFavorites() {
   }
 
   const remove = (id: string) => {
-    store.removeFavorite(id)
+    storeFavorites.removeFavorite(id)
   }
 
   return { favorites, isFavorite, add, remove }

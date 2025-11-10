@@ -13,7 +13,7 @@
           class="text-sm text-gray-500 truncate"
           v-tippy="{
             content: `${location.region}, ${location.country}`,
-            placement: 'top'
+            placement: 'top',
           }"
         >
           {{ location.region }}, {{ location.country }}
@@ -24,18 +24,14 @@
     <div class="flex items-center justify-between text-sm text-gray-700 mb-4">
       <div class="flex items-center gap-1.5">
         <Globe class="w-4 h-4 text-gray-500" />
-        <span
-          v-tippy="{ content: `Широта: ${location.lat?.toFixed(6)}°`, placement: 'top' }"
-        >
+        <span v-tippy="{ content: `Широта: ${location.lat?.toFixed(6)}°`, placement: 'top' }">
           Ш: {{ location.lat?.toFixed(3) || '-' }}°
         </span>
       </div>
 
       <div class="flex items-center gap-1.5">
         <Globe class="w-4 h-4 text-gray-500" />
-        <span
-          v-tippy="{ content: `Долгота: ${location.lon?.toFixed(6)}°`, placement: 'top' }"
-        >
+        <span v-tippy="{ content: `Долгота: ${location.lon?.toFixed(6)}°`, placement: 'top' }">
           Д: {{ location.lon?.toFixed(3) || '-' }}°
         </span>
       </div>
@@ -68,13 +64,13 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useWeatherStore } from '../stores/weather'
+import { useWeatherStore } from '../stores/weatherStore'
 import { MapPin, Clock, Globe, Map, MapPinned } from 'lucide-vue-next'
 import { formatTime } from '../tools/helper'
 import { useRouter } from 'vue-router'
 
-const store = useWeatherStore()
-const { location } = storeToRefs(store)
+const storeWeather = useWeatherStore()
+const { location } = storeToRefs(storeWeather)
 const router = useRouter()
 
 const goActiveCity = () => {

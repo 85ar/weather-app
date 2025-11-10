@@ -40,7 +40,7 @@
       </div>
 
       <!-- <button
-        @click="store.fetchForecastWeatherByCity()"
+        @click="storeWeather.fetchForecastWeatherByCity()"
         class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
         :disabled="!city.length"
       >
@@ -85,20 +85,26 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useWeatherStore, type CityOptions } from '../stores/weather'
+import { useWeatherStore } from '../stores/weatherStore'
 import { X, Navigation, Heart, User } from 'lucide-vue-next'
 import { useDetectLocation } from '../composable/useDetectLocation'
 import { useToast } from 'vue-toastification'
 import { ref } from 'vue'
 import { useFavorites } from '../composable/useFavorites'
+import { useSearchStore, type CityOptions } from '../stores/searchStore'
 
-const store = useWeatherStore()
+const storeWeather = useWeatherStore()
+const storeSearch = useSearchStore()
 
 const highlightedIndex = ref(-1)
 
 const showOptions = ref(false)
 
-const { city, activeDay, citiesOptions, loadingOptions } = storeToRefs(store)
+let searchTimeout: number | null = null
+const DEBOUNCE_DELAY = 400 // задержка запроса города
+
+const { city, activeDay } = storeToRefs(storeWeather)
+const { citiesOptions, loadingOptions } = storeToRefs(storeSearch)
 
 const { getLocation, isSupportedLocation, isDetectingLocation, locationError, isSuccessDetecting } =
   useDetectLocation()
@@ -115,7 +121,7 @@ const searchWeather = (item: CityOptions) => {
   letter.value = item.name
   showOptions.value = false
   highlightedIndex.value = -1
-  if (city.value) store.fetchForecastWeatherByCity()
+  if (city.value) storeWeather.fetchForecastWeatherByCity()
   citiesOptions.value = []
 }
 
@@ -123,7 +129,7 @@ const searchWeather = (item: CityOptions) => {
 const resetInput = () => {
   city.value = ''
   activeDay.value = ''
-  store.clearData()
+  storeWeather.clearWeatherData()
   highlightedIndex.value = -1
   showOptions.value = false
   citiesOptions.value = []
@@ -142,7 +148,7 @@ const detectLocation = async () => {
     toast.success('Местоположение определено успешно')
   }
   if (coordinates) {
-    await store.fetchForecastWeatherByCoords(coordinates.latitude, coordinates.longitude)
+    await storeWeather.fetchForecastWeatherByCoords(coordinates.latitude, coordinates.longitude)
     letter.value = city.value
   }
 }
@@ -152,10 +158,19 @@ const searchCity = (value: string) => {
   if (!value.trim()) {
     citiesOptions.value = []
     showOptions.value = false
-    store.clearData()
+    storeWeather.clearWeatherData()
     return
   }
-  store.fetchCityBySearch(value)
+
+  // Отменяем предыдущий таймер
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+
+  // задержка запроса города
+  searchTimeout = window.setTimeout(() => {
+    storeSearch.fetchCityBySearch(value)
+  }, DEBOUNCE_DELAY)
 }
 
 // управление стрелками в списке городов-опций

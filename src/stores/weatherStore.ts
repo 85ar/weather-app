@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import {
-  getCityBySearch,
   getForecastWeatherByCity,
   getForecastWeatherByCoords,
 } from '../api/service'
@@ -19,12 +18,6 @@ export interface Location {
 export interface ConditionData {
   text: string
   icon: string
-}
-
-export interface CityOptions {
-  id: number
-  name: string
-  country: string
 }
 
 export interface Current {
@@ -69,31 +62,12 @@ export interface HourData {
   pressure_mb: number
 }
 
-export interface FavoriteCity {
-  id: string
-  name: string
-  country: string
-  lat: number
-  lon: number
-  temp_c: number
-  condition: {
-    text: string
-    icon: string
-  }
-}
-
 export const useWeatherStore = defineStore('weather', () => {
   const city = ref<string>('')
-  const citiesOptions = ref<CityOptions[]>([])
   const current = ref<Current>({} as Current)
   const forecast = ref<Forecast>({} as Forecast)
   const location = ref<Location>({} as Location)
-
   const loading = ref<boolean>(false)
-  const loadingOptions = ref<boolean>(false)
-
-  // Избранные города
-  const favorites = ref<FavoriteCity[]>([])
 
   // выбранный день прогноза
   const activeDay = ref<string>()
@@ -104,7 +78,7 @@ export const useWeatherStore = defineStore('weather', () => {
 
   const fetchForecastWeatherByCity = async () => {
     loading.value = true
-    clearData()
+    clearWeatherData()
     try {
       const result = await getForecastWeatherByCity(city.value)
       city.value = result.location.name
@@ -136,70 +110,22 @@ export const useWeatherStore = defineStore('weather', () => {
     }
   }
 
-  const fetchCityBySearch = async (search: string) => {
-    loadingOptions.value = true
-    try {
-      const result = await getCityBySearch(search)
-      citiesOptions.value = result
-    } catch (error) {
-      console.error(error)
-    } finally {
-      loadingOptions.value = false
-    }
-  }
-
-  const clearData = () => {
+  const clearWeatherData = () => {
     current.value = {} as Current
     forecast.value = {} as Forecast
     location.value = {} as Location
   }
 
-  // работаем с localStorage
-  const loadFavorites = () => {
-    const data = localStorage.getItem('favorite')
-    favorites.value = data ? JSON.parse(data) : []
-  }
-
-  const saveFavorites = () => {
-    localStorage.setItem('favorite', JSON.stringify(favorites.value))
-  }
-
-  const addFavorite = (city: FavoriteCity) => {
-    if (!favorites.value.some((f) => f.id === city.id)) {
-      favorites.value.push(city)
-      saveFavorites()
-    }
-  }
-
-  const removeFavorite = (id: string) => {
-    favorites.value = favorites.value.filter((f) => f.id !== id)
-    saveFavorites()
-  }
-
-  const isFavorite = computed(() => {
-    return favorites.value.some(
-      (fav) => fav.lat === location.value.lat && fav.lon === location.value.lon,
-    )
-  })
-
   return {
     fetchForecastWeatherByCity,
     fetchForecastWeatherByCoords,
-    fetchCityBySearch,
-    citiesOptions,
     city,
     current,
     forecast,
     location,
     loading,
-    loadingOptions,
     activeDay,
     setActiveDay,
-    clearData,
-    favorites,
-    loadFavorites,
-    addFavorite,
-    removeFavorite,
-    isFavorite,
+    clearWeatherData,
   }
 })

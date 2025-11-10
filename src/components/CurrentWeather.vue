@@ -2,7 +2,6 @@
   <div
     class="bg-white rounded-2xl shadow-md hover:shadow-sm transition-shadow p-5 border border-gray-100"
   >
-
     <div class="text-xs text-right text-gray-500 mb-2">
       Обновлено: {{ formatDate(current.last_updated) }}
     </div>
@@ -29,7 +28,6 @@
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-
       <div class="text-center">
         <p class="text-xs text-gray-500 mb-1">Влажность</p>
         <p class="text-lg font-semibold text-gray-800">{{ current.humidity }}%</p>
@@ -64,20 +62,19 @@
         <p class="text-xs text-gray-500 mb-1">Видимость</p>
         <p class="text-lg font-semibold text-gray-800">{{ current.vis_km }} км</p>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useWeatherStore } from '../stores/weather'
+import { useWeatherStore } from '../stores/weatherStore'
 import { formatDate, formatSpeed } from '../tools/helper'
 import { computed } from 'vue'
 import { ThermometerSun } from 'lucide-vue-next'
 
-const store = useWeatherStore()
-const { current } = storeToRefs(store)
+const storeWeather = useWeatherStore()
+const { current } = storeToRefs(storeWeather)
 
 const pressure = computed(() => {
   const pres = current.value.pressure_mb * 0.750062
