@@ -13,6 +13,7 @@ import router from './router'
 
 const app = createApp(App)
 
+// Базовая настройка для всплывающих уведомлений
 app.use(Toast, {
   transition: 'Vue-Toastification__bounce',
   maxToasts: 5,
@@ -24,6 +25,7 @@ app.use(Toast, {
   toastClassName: 'custom-toast',
 })
 
+// Базовая настройка для тултипов
 app.use(VueTippy, {
   defaultProps: {
     theme: 'simple',
