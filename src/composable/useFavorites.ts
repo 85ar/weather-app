@@ -6,14 +6,11 @@ import { useFavoritesStore } from '../stores/favoritesStore'
 export function useFavorites() {
   const storeWeather = useWeatherStore()
   const storeFavorites = useFavoritesStore()
-
   const { current, location } = storeToRefs(storeWeather)
   const { favorites } = storeToRefs(storeFavorites)
 
   const isFavorite = computed(() => {
-    return favorites.value.some(
-      (fav) => fav.lat === location.value.lat && fav.lon === location.value.lon,
-    )
+    return storeFavorites.hasFavorite(location.value.lat, location.value.lon)
   })
 
   const add = () => {

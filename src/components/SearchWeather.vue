@@ -5,33 +5,30 @@
         <input
           v-model="letter"
           type="text"
-          @focus="showOptions = true"
+          @input="searchCity(letter)"
           @keydown="handleKeydown"
           placeholder="Введите город..."
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 hover:border-blue-500 pr-10"
-          @input="searchCity(letter)"
         />
         <ul
-          v-if="showOptions && citiesOptions.length"
-          class="absolute z-10 w-full bg-white border border-t-0 border-gray-300 rounded-b shadow mt-0"
+          v-if="citiesOptions.length && letter.length > 1"
+          class="absolute z-10 w-full bg-white border border-t-0 border-gray-300 rounded-b shadow mt-0 max-h-60 overflow-y-auto"
         >
           <li
             v-for="(item, index) in citiesOptions"
             :key="item.id"
             @click="searchWeather(item)"
-            @mouseenter="highlightedIndex = index"
-            :class="{
-              'bg-blue-100': highlightedIndex === index,
-              'p-2 hover:bg-gray-100 cursor-pointer': true,
-            }"
+            class="p-2 hover:bg-blue-100 cursor-pointer last:border-b-0"
+            :class="{ 'bg-blue-100': highlightedIndex === index }"
           >
             {{ item.name }} ({{ item.country }})
           </li>
         </ul>
+
         <span v-if="loadingOptions" class="loader absolute right-4 top-2"></span>
 
         <button
-          v-if="city"
+          v-if="letter && !loadingOptions"
           @click="resetInput"
           class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition cursor-pointer"
         >
@@ -39,23 +36,11 @@
         </button>
       </div>
 
-      <!-- <button
-        @click="storeWeather.fetchForecastWeatherByCity()"
-        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
-        :disabled="!city.length"
-      >
-        Поиск
-      </button> -->
-
       <button
         v-if="isSupportedLocation"
         @click="detectLocation"
         :disabled="isDetectingLocation"
         class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-        v-tippy="{
-          content: 'Автоматическое определение местоположения',
-          placement: 'top',
-        }"
       >
         <Navigation class="w-4 h-4" />
         <span>{{ isDetectingLocation ? '...' : 'Авто' }}</span>
@@ -66,10 +51,6 @@
         @click="addFavoriteCity()"
         class="px-4 py-2 text-gray-500 rounded-lg hover:bg-green-600 transition cursor-pointer flex items-center gap-2"
         :class="isFavorite ? 'bg-green-500 text-white' : 'bg-gray-300 '"
-        v-tippy="{
-          content: isFavorite ? 'Город в Избранном' : 'Добавить город в Избранное',
-          placement: 'top',
-        }"
       >
         <Heart class="w-4 h-4" />
       </button>
@@ -98,10 +79,8 @@ const storeSearch = useSearchStore()
 
 const highlightedIndex = ref(-1)
 
-const showOptions = ref(false)
-
 let searchTimeout: number | null = null
-const DEBOUNCE_DELAY = 400 // задержка запроса города
+const DEBOUNCE_DELAY = 400
 
 const { city, activeDay } = storeToRefs(storeWeather)
 const { citiesOptions, loadingOptions } = storeToRefs(storeSearch)
@@ -112,17 +91,16 @@ const { getLocation, isSupportedLocation, isDetectingLocation, locationError, is
 const { isFavorite, add } = useFavorites()
 
 const letter = ref<string>(city.value)
-
 const toast = useToast()
 
 // поиск погоды
 const searchWeather = (item: CityOptions) => {
   city.value = item.name
   letter.value = item.name
-  showOptions.value = false
+  citiesOptions.value = [] // очищаем опции после выбора
   highlightedIndex.value = -1
+
   if (city.value) storeWeather.fetchForecastWeatherByCity()
-  citiesOptions.value = []
 }
 
 // сброс инпута
@@ -131,7 +109,6 @@ const resetInput = () => {
   activeDay.value = ''
   storeWeather.clearWeatherData()
   highlightedIndex.value = -1
-  showOptions.value = false
   citiesOptions.value = []
   letter.value = ''
 }
@@ -139,7 +116,6 @@ const resetInput = () => {
 // определяем местоположение
 const detectLocation = async () => {
   const coordinates = await getLocation()
-  showOptions.value = false
   citiesOptions.value = []
   if (locationError.value.length) {
     toast.error(locationError.value)
@@ -155,27 +131,24 @@ const detectLocation = async () => {
 
 // ищем город по введенным символам
 const searchCity = (value: string) => {
-  if (!value.trim()) {
+  if (!value.trim() || value.length < 2) {
     citiesOptions.value = []
-    showOptions.value = false
-    storeWeather.clearWeatherData()
     return
   }
 
-  // Отменяем предыдущий таймер
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
-  // задержка запроса города
   searchTimeout = window.setTimeout(() => {
     storeSearch.fetchCityBySearch(value)
   }, DEBOUNCE_DELAY)
 }
 
-// управление стрелками в списке городов-опций
+// управление стрелками
 const handleKeydown = (e: KeyboardEvent) => {
-  if (!showOptions.value || !citiesOptions.value.length) return
+  if (!citiesOptions.value.length) return
+
   switch (e.key) {
     case 'ArrowDown':
       e.preventDefault()
@@ -192,11 +165,12 @@ const handleKeydown = (e: KeyboardEvent) => {
       }
       break
     case 'Escape':
-      showOptions.value = false
+      citiesOptions.value = []
       highlightedIndex.value = -1
       break
   }
 }
+
 const addFavoriteCity = () => {
   if (isFavorite.value) {
     toast.info('Город уже находится в Избранном')

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
-import { useWeatherStore } from './weatherStore'
+import { ref } from 'vue'
 
 export interface FavoriteCity {
   id: string
@@ -16,12 +15,9 @@ export interface FavoriteCity {
 }
 
 export const useFavoritesStore = defineStore('favorites', () => {
-  const storeWeather = useWeatherStore()
-
   // Избранные города
   const favorites = ref<FavoriteCity[]>([])
 
-  // работаем с localStorage
   const loadFavorites = () => {
     const data = localStorage.getItem('favorite')
     favorites.value = data ? JSON.parse(data) : []
@@ -43,17 +39,15 @@ export const useFavoritesStore = defineStore('favorites', () => {
     saveFavorites()
   }
 
-  const isFavorite = computed(() => {
-    return favorites.value.some(
-      (fav) => fav.lat === storeWeather.location.lat && fav.lon === storeWeather.location.lon,
-    )
-  })
+  const hasFavorite = (lat: number, lon: number) => {
+    return favorites.value.some((fav) => fav.lat === lat && fav.lon === lon)
+  }
 
   return {
     favorites,
     loadFavorites,
     addFavorite,
     removeFavorite,
-    isFavorite,
+    hasFavorite,
   }
 })

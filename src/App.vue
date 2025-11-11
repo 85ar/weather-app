@@ -7,16 +7,27 @@
   </div>
 </template>
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import NavBar from './components/NavBar.vue'
 import { hideAll } from 'tippy.js'
 import { useFavoritesStore } from './stores/favoritesStore'
 
-// скрытие тултипов при скролле
-window.addEventListener('wheel', () => hideAll(), { passive: true })
-window.addEventListener('scroll', () => hideAll(), { passive: true })
-
+const hide = () => hideAll()
 const storeFavorites = useFavoritesStore()
-storeFavorites.loadFavorites()
+
+// скрытие тултипов при скролле
+onMounted(() => {
+  window.addEventListener('wheel', hide, { passive: true })
+  window.addEventListener('scroll', hide, { passive: true })
+
+  storeFavorites.loadFavorites()
+})
+
+// Очистка при размонтировании
+onUnmounted(() => {
+  window.removeEventListener('wheel', hide)
+  window.removeEventListener('scroll', hide)
+})
 </script>
 
 <style scoped></style>

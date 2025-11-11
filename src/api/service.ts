@@ -15,10 +15,9 @@ export const getForecastWeatherByCoords = async (latitude: number, longitude: nu
   return response.data
 }
 
-export const getCityBySearch = async (search: string, signal?: AbortSignal) => {
+export const getCityBySearch = async (search: string) => {
   const response = await axios.get('/api/search', {
     params: { q: search },
-    signal, // сигнал отмены
   })
   return response.data
 }

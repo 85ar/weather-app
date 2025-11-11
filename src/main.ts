@@ -13,8 +13,10 @@ import router from './router'
 
 const app = createApp(App)
 
+const pinia = createPinia()
+
 // Базовая настройка для всплывающих уведомлений
-app.use(Toast, {
+const toastOptions = {
   transition: 'Vue-Toastification__bounce',
   maxToasts: 5,
   newestOnTop: true,
@@ -23,10 +25,10 @@ app.use(Toast, {
   pauseOnFocusLoss: true,
   pauseOnHover: true,
   toastClassName: 'custom-toast',
-})
+}
 
 // Базовая настройка для тултипов
-app.use(VueTippy, {
+const tippyOptions = {
   defaultProps: {
     theme: 'simple',
     placement: 'top',
@@ -36,9 +38,12 @@ app.use(VueTippy, {
     duration: [150, 100],
     offset: [0, 8],
   },
-})
+}
 
-app.use(createPinia())
+app.use(Toast, toastOptions)
+app.use(VueTippy, tippyOptions)
+
+app.use(pinia)
 app.use(router)
 
 app.mount('#app')

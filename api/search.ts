@@ -16,9 +16,15 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       },
     })
     res.json(response.data)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('Search API error:', error.response?.data || error.message)
-    res.status(500).json({ error: 'Failed to search cities' })
+  } catch (error: unknown) {
+    console.error('Weather API error:', error instanceof Error ? error.message : 'Unknown error')
+
+    if (axios.isAxiosError(error)) {
+      res.status(error.response?.status || 500).json({
+        error: error.response?.data?.error || 'Failed to fetch weather data',
+      })
+    } else {
+      res.status(500).json({ error: 'Internal server error' })
+    }
   }
 }

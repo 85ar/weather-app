@@ -1,9 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import {
-  getForecastWeatherByCity,
-  getForecastWeatherByCoords,
-} from '../api/service'
+import { getForecastWeatherByCity, getForecastWeatherByCoords } from '../api/service'
 
 export interface Location {
   name: string
@@ -69,6 +66,8 @@ export const useWeatherStore = defineStore('weather', () => {
   const location = ref<Location>({} as Location)
   const loading = ref<boolean>(false)
 
+  const error = ref<string | null>(null)
+
   // выбранный день прогноза
   const activeDay = ref<string>()
 
@@ -78,6 +77,7 @@ export const useWeatherStore = defineStore('weather', () => {
 
   const fetchForecastWeatherByCity = async () => {
     loading.value = true
+    error.value = null
     clearWeatherData()
     try {
       const result = await getForecastWeatherByCity(city.value)
@@ -86,8 +86,8 @@ export const useWeatherStore = defineStore('weather', () => {
       forecast.value = result.forecast
       location.value = result.location
       activeDay.value = forecast.value.forecastday[0]?.date
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch weather'
     } finally {
       loading.value = false
     }
@@ -95,16 +95,16 @@ export const useWeatherStore = defineStore('weather', () => {
 
   const fetchForecastWeatherByCoords = async (latitude: number, longitude: number) => {
     loading.value = true
+    error.value = null
     try {
       const result = await getForecastWeatherByCoords(latitude, longitude)
       city.value = result.location.name
       current.value = result.current
       forecast.value = result.forecast
       location.value = result.location
-
       activeDay.value = forecast.value.forecastday[0]?.date
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch weather'
     } finally {
       loading.value = false
     }
@@ -127,5 +127,6 @@ export const useWeatherStore = defineStore('weather', () => {
     activeDay,
     setActiveDay,
     clearWeatherData,
+    error,
   }
 })
