@@ -1,7 +1,7 @@
 <template>
-  <h1 class="text-xl font-semibold m-4">Избранные города</h1>
+  <h1 class="text-xl font-semibold p-4 bg-white sticky top-0 z-10 ">Избранные города</h1>
 
-  <div v-if="favorites.length === 0" class="m-4 text-gray-500">Нет сохранённых городов</div>
+  <div v-if="favorites.length === 0" class="p-4 text-gray-500">Нет сохранённых городов</div>
 
   <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
     <CardFavorite v-for="favorite in favorites" :key="favorite.id" :favorite="favorite" />

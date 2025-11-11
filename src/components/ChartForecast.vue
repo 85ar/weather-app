@@ -137,6 +137,7 @@ const chartOptions: ChartOptions<'line'> = {
 <style scoped>
 .chart-wrapper {
   width: 100%;
+  aspect-ratio: 16 / 9;
   max-width: 900px;
   height: 420px;
   margin: 0 auto;

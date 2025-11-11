@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4">
-    <div class="flex gap-2">
+    <div class="flex flex-col sm:flex-row gap-2">
       <div class="relative flex-1">
         <input
           v-model="letter"
@@ -35,31 +35,32 @@
           <X class="w-5 h-5" />
         </button>
       </div>
+      <div class="flex flex-row justify-center sm:flex-row gap-2">
+        <button
+          v-if="isSupportedLocation"
+          @click="detectLocation"
+          :disabled="isDetectingLocation"
+          class="px-6 py-2 sm:px-4 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <Navigation class="w-4 h-4" />
+          <span class="hidden sm:block">{{ isDetectingLocation ? '...' : 'Авто' }}</span>
+        </button>
 
-      <button
-        v-if="isSupportedLocation"
-        @click="detectLocation"
-        :disabled="isDetectingLocation"
-        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-      >
-        <Navigation class="w-4 h-4" />
-        <span>{{ isDetectingLocation ? '...' : 'Авто' }}</span>
-      </button>
+        <button
+          v-if="city"
+          @click="addFavoriteCity()"
+          class="px-6 py-2 sm:px-4 sm:py-2 text-gray-500 rounded-lg hover:bg-green-600 transition cursor-pointer flex items-center gap-2"
+          :class="isFavorite ? 'bg-green-500 text-white' : 'bg-gray-300 '"
+        >
+          <Heart class="w-4 h-4" />
+        </button>
 
-      <button
-        v-if="city"
-        @click="addFavoriteCity()"
-        class="px-4 py-2 text-gray-500 rounded-lg hover:bg-green-600 transition cursor-pointer flex items-center gap-2"
-        :class="isFavorite ? 'bg-green-500 text-white' : 'bg-gray-300 '"
-      >
-        <Heart class="w-4 h-4" />
-      </button>
-
-      <button
-        class="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg hover:bg-gray-400 transition cursor-pointer flex items-center gap-2"
-      >
-        <User class="w-4 h-4" />
-      </button>
+        <button
+          class="px-6 py-2 sm:px-4 sm:py-2 bg-gray-300 text-gray-500 rounded-lg hover:bg-gray-400 transition cursor-pointer flex items-center gap-2"
+        >
+          <User class="w-4 h-4" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -70,7 +71,7 @@ import { useWeatherStore } from '../stores/weatherStore'
 import { X, Navigation, Heart, User } from 'lucide-vue-next'
 import { useDetectLocation } from '../composable/useDetectLocation'
 import { useToast } from 'vue-toastification'
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import { useFavorites } from '../composable/useFavorites'
 import { useSearchStore, type CityOptions } from '../stores/searchStore'
 
@@ -179,6 +180,10 @@ const addFavoriteCity = () => {
     toast.success('Город добавлен в Избранное')
   }
 }
+
+onUnmounted(() => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+})
 </script>
 
 <style scoped>

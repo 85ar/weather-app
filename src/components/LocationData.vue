@@ -1,27 +1,18 @@
 <template>
   <div
-    class="relative w-90 bg-white rounded-2xl shadow-md hover:shadow-sm transition-shadow p-5 border border-gray-100"
+    class="relative w-90 bg-white rounded-2xl shadow-md hover:shadow-sm transition-shadow p-4 lg:p-5 border border-gray-100"
   >
-    <div class="flex items-start gap-3 mb-5">
-      <MapPin class="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
-
+    <div class="flex flex-row sm:items-start gap-2 sm:gap-3 mb-6">
+      <MapPin class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
       <div class="min-w-0 flex-1">
-        <h2 class="text-lg font-semibold text-gray-900 truncate">
+        <h2 class="text-lg md:text-xl font-semibold text-gray-900 truncate">
           {{ location.name }}
         </h2>
-        <p
-          class="text-sm text-gray-500 truncate"
-          v-tippy="{
-            content: `${location.region}, ${location.country}`,
-            placement: 'top',
-          }"
-        >
-          {{ location.region }}, {{ location.country }}
-        </p>
+        <p class="text-sm text-gray-500 truncate">{{ location.region }}, {{ location.country }}</p>
       </div>
     </div>
 
-    <div class="flex items-center justify-between text-sm text-gray-700 mb-4">
+    <div class="flex items-center justify-between text-sm md:text-md text-gray-700 mb-4">
       <div class="flex items-center gap-1.5">
         <Globe class="w-4 h-4 text-gray-500" />
         <span v-tippy="{ content: `Широта: ${location.lat?.toFixed(6)}°`, placement: 'top' }">
@@ -37,7 +28,7 @@
       </div>
     </div>
 
-    <div class="flex items-center justify-between text-sm text-gray-700 mb-5">
+    <div class="flex items-center justify-between text-sm md:text-md text-gray-700 mb-5">
       <div class="flex items-center gap-1.5">
         <Clock class="w-4 h-4 text-gray-500" />
         <span>{{ formatTime(location.localtime) }}</span>
@@ -54,9 +45,9 @@
 
     <button
       @click="goActiveCity"
-      class="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+      class="flex items-center gap-2 text-sm md:text-md md:text-md font-medium md:mt-8 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
     >
-      <MapPinned class="w-4 h-4 text-blue-500" />
+      <MapPinned class="w-5 h-5 text-blue-500" />
       Показать на карте
     </button>
   </div>

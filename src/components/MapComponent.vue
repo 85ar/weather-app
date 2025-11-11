@@ -1,6 +1,7 @@
 <template>
   <div class="mb-2">
-    <div class="flex items-center gap-2">
+    <h1 class="text-center md:text-left text-xl font-semibold p-2 bg-white top-0 ">Карта городов</h1>
+    <div class="flex items-center gap-2 pb-2">
       <div v-if="city.length">Текущий город: {{ city }}</div>
       <button
         v-if="city.length && !isFavorite"
@@ -11,7 +12,7 @@
         <HeartPlus class="w-5 h-5" />
       </button>
     </div>
-    <div v-if="favorites.length">
+    <div v-if="favorites.length" class=" pb-2">
       Избранные города:
       <span
         v-for="(fav, index) in favorites"

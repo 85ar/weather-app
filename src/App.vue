@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-screen">
     <NavBar />
-    <main class="flex-1 p-4">
+    <main class="flex-1 pl-19 p-3 md:p-4 sm:pl-20 overflow-y-auto">
       <RouterView />
     </main>
   </div>

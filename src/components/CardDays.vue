@@ -1,15 +1,15 @@
 <template>
-  <div class="my-6">
-    <h3 class="text-2xl font-semibold text-gray-900 mb-5">
+  <div class="my-6 px-2 md:px-0">
+    <h3 class="text-lg md:text-2xl text-center font-semibold text-gray-900 mb-5">
       Прогноз на ближайшие дни
     </h3>
 
-    <div class="flex gap-5 overflow-x-auto pb-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       <div
         v-for="item in forecast.forecastday"
         :key="item.date"
         @click="handleClick(item.date)"
-        class="w-76 flex-shrink-0 rounded-2xl border border-gray-100 p-5 cursor-pointer transition-all shadow-sm hover:shadow-lg"
+        class="rounded-2xl  p-4 md:p-5 cursor-pointer transition-all shadow-md hover:shadow-md"
         :class="activeDay === item.date ? 'bg-blue-50 border-blue-200' : 'bg-white'"
       >
 
