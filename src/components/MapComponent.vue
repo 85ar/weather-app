@@ -6,15 +6,11 @@
         v-if="city.length && !isFavorite"
         @click="addFavoriteCity()"
         class="rounded hover:text-green-700 text-green-500 transition-colors cursor-pointer"
-        v-tippy="{
-          content: 'Добавить город в Избранное',
-          placement: 'top',
-        }"
+        v-tippy="{ content: 'Добавить город в Избранное', placement: 'top' }"
       >
         <HeartPlus class="w-5 h-5" />
       </button>
     </div>
-
     <div v-if="favorites.length">
       Избранные города:
       <span
@@ -27,61 +23,55 @@
       </span>
     </div>
     <div v-else>Нет избранных городов</div>
-  </div>
 
-  <div ref="mapContainer" class="map-container mt-2"></div>
+    <div ref="mapContainer" class="map-container mt-2"></div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
-import L, { type Map as LMap } from 'leaflet'
+import { ref, onMounted, watch, nextTick } from 'vue'
+import L, { type Map as LMap, type Marker } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useWeatherStore } from '../stores/weatherStore'
+import { useFavoritesStore } from '../stores/favoritesStore'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { HeartPlus } from 'lucide-vue-next'
 import { useFavorites } from '../composable/useFavorites'
 import { useToast } from 'vue-toastification'
-import { useFavoritesStore } from '../stores/favoritesStore'
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 const map = ref<LMap | null>(null)
-const route = useRoute()
 
+const currentMarker = ref<Marker | null>(null) // Маркер текущего города
+const favoriteMarkers = ref<Marker[]>([]) // Маркеры избранных
+
+const route = useRoute()
 const storeWeather = useWeatherStore()
 const { city, location } = storeToRefs(storeWeather)
 
 const storeFavorites = useFavoritesStore()
 const { favorites } = storeToRefs(storeFavorites)
+
 const { isFavorite, add } = useFavorites()
 const toast = useToast()
 
-type FavCity = {
-  id: string | number
-  name: string
-  country: string
-  lat: number
-  lon: number
-  temp_c: number
-}
-
-let openedPopup: L.Popup | null = null
-
-const focusCity = (fav: FavCity) => {
+// Фокус на выбранный город
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const focusCity = (fav: any) => {
   if (!map.value) return
-
-  // Плавный перелет
   map.value.flyTo([fav.lat, fav.lon], 10, { duration: 1.2 })
 
-  // Закрываем предыдущий popup
-  if (openedPopup) {
-    map.value.closePopup(openedPopup)
-  }
+  const popupContent = `<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`
 
-  openedPopup = L.popup({ offset: [0, -30] })
-    .setLatLng([fav.lat, fav.lon])
-    .setContent(`<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`)
-    .openOn(map.value as LMap)
+  // Закрываем предыдущий popup
+  favoriteMarkers.value.forEach((marker) => marker.closePopup())
+
+  // Ищем маркер города и открываем popup
+  const marker = favoriteMarkers.value.find(
+    (m) => m.getLatLng().lat === fav.lat && m.getLatLng().lng === fav.lon,
+  )
+  if (marker) marker.bindPopup(popupContent).openPopup()
 }
 
 const addFavoriteCity = () => {
@@ -89,41 +79,71 @@ const addFavoriteCity = () => {
   toast.success('Город добавлен в Избранное')
 }
 
+// Инициализация карты
 onMounted(() => {
   if (!mapContainer.value) return
 
   map.value = L.map(mapContainer.value).setView([55.75, 37.62], 5)
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map.value as LMap)
 
   nextTick(() => {
-    setTimeout(() => {
-      map.value?.invalidateSize()
-    }, 80)
+    map.value?.invalidateSize()
 
     const lat = Number(route.query.lat)
     const lon = Number(route.query.lon)
+    if (lat && lon) map.value?.setView([lat, lon], 10)
 
-    if (lat && lon) {
-      map.value?.setView([lat, lon], 10)
+    // Маркер текущего города
+    if (location.value.lat && location.value.lon) {
+      if (currentMarker.value) currentMarker.value.remove()
+      currentMarker.value = L.marker([location.value.lat, location.value.lon])
+        .addTo(map.value as LMap)
+        .bindPopup(`${location.value.name}<br>${location.value.country}`)
+        .openPopup()
     }
+
+    // Маркеры избранных
+    favoriteMarkers.value.forEach((m) => m.remove())
+    favoriteMarkers.value = []
+    favorites.value.forEach((fav) => {
+      if (fav.lat && fav.lon) {
+        const marker = L.marker([fav.lat, fav.lon])
+          .addTo(map.value! as LMap)
+          .bindPopup(`<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`)
+        favoriteMarkers.value.push(marker)
+      }
+    })
   })
+})
 
-  // Текущий город
-  if (location.value.lat && location.value.lon) {
-    L.marker([location.value.lat, location.value.lon])
-      .addTo(map.value as LMap)
-      .bindPopup(`${location.value.name}<br>${location.value.country}`)
-      .openPopup()
-  }
+// Авто-обновление маркеров при изменении избранного списка
+watch(favorites, () => {
+  if (!map.value) return
 
-  // Избранные из Pinia
+  favoriteMarkers.value.forEach((m) => m.remove())
+  favoriteMarkers.value = []
+
   favorites.value.forEach((fav) => {
     if (fav.lat && fav.lon) {
-      L.marker([fav.lat, fav.lon])
+      const marker = L.marker([fav.lat, fav.lon])
         .addTo(map.value! as LMap)
         .bindPopup(`<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`)
+      favoriteMarkers.value.push(marker)
     }
   })
+})
+
+// Авто-обновление текущего города
+watch(location, (loc) => {
+  if (!map.value) return
+  if (!loc.lat || !loc.lon) return
+
+  if (currentMarker.value) currentMarker.value.remove()
+  currentMarker.value = L.marker([loc.lat, loc.lon])
+    .addTo(map.value as LMap)
+    .bindPopup(`${loc.name}<br>${loc.country}`)
+    .openPopup()
 })
 </script>
 
