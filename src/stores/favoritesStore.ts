@@ -1,18 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-
-export interface FavoriteCity {
-  id: string
-  name: string
-  country: string
-  lat: number
-  lon: number
-  temp_c: number
-  condition: {
-    text: string
-    icon: string
-  }
-}
+import type { FavoriteCity } from './types'
 
 export const useFavoritesStore = defineStore('favorites', () => {
   // Избранные города

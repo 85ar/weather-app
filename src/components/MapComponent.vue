@@ -2,9 +2,9 @@
   <div class="mb-2">
     <h1 class="text-center md:text-left text-xl font-semibold p-2 bg-white top-0 ">Карта городов</h1>
     <div class="flex items-center gap-2 pb-2">
-      <div v-if="city.length">Текущий город: {{ city }}</div>
+      <div v-if="activeCity">Текущий город: {{ activeCity.name }}</div>
       <button
-        v-if="city.length && !isFavorite"
+        v-if="activeCity && !isFavorite"
         @click="addFavoriteCity()"
         class="rounded hover:text-green-700 text-green-500 transition-colors cursor-pointer"
         v-tippy="{ content: 'Добавить город в Избранное', placement: 'top' }"
@@ -49,7 +49,7 @@ const favoriteMarkers = ref<Marker[]>([]) // Маркеры избранных
 
 const route = useRoute()
 const storeWeather = useWeatherStore()
-const { city, location } = storeToRefs(storeWeather)
+const { activeCity, location } = storeToRefs(storeWeather)
 
 const storeFavorites = useFavoritesStore()
 const { favorites } = storeToRefs(storeFavorites)

@@ -1,12 +1,7 @@
 import { ref } from 'vue'
 import { getCityBySearch } from '../api/service'
 import { defineStore } from 'pinia'
-
-export interface CityOptions {
-  id: number
-  name: string
-  country: string
-}
+import type { CityOptions } from './types'
 
 export const useSearchStore = defineStore('search', () => {
   const citiesOptions = ref<CityOptions[]>([])

@@ -47,7 +47,15 @@
         </button>
 
         <button
-          v-if="city"
+          v-if="Object.keys(activeCity).length"
+          @click="updateData()"
+          class="px-6 py-2 sm:px-4 sm:py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition cursor-pointer flex items-center gap-2"
+        >
+          <RotateCcw class="w-4 h-4" />
+        </button>
+
+        <button
+          v-if="Object.keys(activeCity).length"
           @click="addFavoriteCity()"
           class="px-6 py-2 sm:px-4 sm:py-2 text-gray-500 rounded-lg hover:bg-green-600 transition cursor-pointer flex items-center gap-2"
           :class="isFavorite ? 'bg-green-500 text-white' : 'bg-gray-300 '"
@@ -68,12 +76,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWeatherStore } from '../stores/weatherStore'
-import { X, Navigation, Heart, User } from 'lucide-vue-next'
+import { X, Navigation, Heart, User, RotateCcw } from 'lucide-vue-next'
 import { useDetectLocation } from '../composable/useDetectLocation'
 import { useToast } from 'vue-toastification'
 import { onUnmounted, ref } from 'vue'
 import { useFavorites } from '../composable/useFavorites'
-import { useSearchStore, type CityOptions } from '../stores/searchStore'
+import { useSearchStore } from '../stores/searchStore'
+import type { CityOptions } from '../stores/types'
 
 const storeWeather = useWeatherStore()
 const storeSearch = useSearchStore()
@@ -83,7 +92,7 @@ const highlightedIndex = ref(-1)
 let searchTimeout: number | null = null
 const DEBOUNCE_DELAY = 400
 
-const { city, activeDay } = storeToRefs(storeWeather)
+const { activeDay, activeCity } = storeToRefs(storeWeather)
 const { citiesOptions, loadingOptions } = storeToRefs(storeSearch)
 
 const { getLocation, isSupportedLocation, isDetectingLocation, locationError, isSuccessDetecting } =
@@ -91,22 +100,22 @@ const { getLocation, isSupportedLocation, isDetectingLocation, locationError, is
 
 const { isFavorite, add } = useFavorites()
 
-const letter = ref<string>(city.value)
+const letter = ref<string>(activeCity.value.name)
 const toast = useToast()
 
 // поиск погоды
 const searchWeather = (item: CityOptions) => {
-  city.value = item.name
+  storeWeather.setActiveCity(item)
   letter.value = item.name
   citiesOptions.value = [] // очищаем опции после выбора
   highlightedIndex.value = -1
 
-  if (city.value) storeWeather.fetchForecastWeatherByCity()
+  if (activeCity.value) storeWeather.fetchForecastWeatherByCity()
 }
 
 // сброс инпута
 const resetInput = () => {
-  city.value = ''
+  storeWeather.setActiveCity({} as CityOptions)
   activeDay.value = ''
   storeWeather.clearWeatherData()
   highlightedIndex.value = -1
@@ -117,6 +126,8 @@ const resetInput = () => {
 // определяем местоположение
 const detectLocation = async () => {
   const coordinates = await getLocation()
+  storeWeather.clearWeatherData()
+  letter.value = ''
   citiesOptions.value = []
   if (locationError.value.length) {
     toast.error(locationError.value)
@@ -126,7 +137,7 @@ const detectLocation = async () => {
   }
   if (coordinates) {
     await storeWeather.fetchForecastWeatherByCoords(coordinates.latitude, coordinates.longitude)
-    letter.value = city.value
+    if (activeCity) letter.value = activeCity.value.name
   }
 }
 
@@ -179,6 +190,11 @@ const addFavoriteCity = () => {
     add()
     toast.success('Город добавлен в Избранное')
   }
+}
+
+const updateData = () => {
+  searchWeather(activeCity.value)
+  toast.info('Данные о погоде обновлены')
 }
 
 onUnmounted(() => {
