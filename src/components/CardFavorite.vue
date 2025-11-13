@@ -57,7 +57,7 @@
 import { useToast } from 'vue-toastification';
 import { useFavorites } from '../composable/useFavorites'
 import { MapPin, Trash2 , Globe } from 'lucide-vue-next'
-import type { FavoriteCity } from '../stores/favoritesStore';
+import type { FavoriteCity } from '../stores/types';
 
 const toast = useToast()
 
