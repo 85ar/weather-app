@@ -6,7 +6,7 @@ import { useFavoritesStore } from '../stores/favoritesStore'
 export function useFavorites() {
   const storeWeather = useWeatherStore()
   const storeFavorites = useFavoritesStore()
-  const { current, location } = storeToRefs(storeWeather)
+  const { location } = storeToRefs(storeWeather)
   const { favorites } = storeToRefs(storeFavorites)
 
   const isFavorite = computed(() => {
@@ -16,16 +16,12 @@ export function useFavorites() {
   const add = () => {
     if (!isFavorite.value) {
       storeFavorites.addFavorite({
-        id: `${location.value.lat}_${location.value.lon}`,
+        id: `${location.value.lat.toFixed(3)}_${location.value.lon.toFixed(3)}`,
         name: location.value.name,
         country: location.value.country,
+        region: location.value.region,
         lat: location.value.lat,
         lon: location.value.lon,
-        temp_c: current.value.temp_c,
-        condition: {
-          text: current.value.condition.text,
-          icon: current.value.condition.icon,
-        },
       })
     }
   }

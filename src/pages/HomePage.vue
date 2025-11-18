@@ -25,7 +25,9 @@ import { storeToRefs } from 'pinia'
 import CardDays from '../components/CardDays.vue'
 
 const storeWeather = useWeatherStore()
+
 const { location, current, forecast, loading } = storeToRefs(storeWeather)
+
 </script>
 
 <style scoped>

@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { FavoriteCity } from './types'
+import type { CityOptions } from './types'
 
 export const useFavoritesStore = defineStore('favorites', () => {
   // Избранные города
-  const favorites = ref<FavoriteCity[]>([])
+  const favorites = ref<CityOptions[]>([])
 
   const loadFavorites = () => {
     const data = localStorage.getItem('favorite')
@@ -15,7 +15,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
     localStorage.setItem('favorite', JSON.stringify(favorites.value))
   }
 
-  const addFavorite = (city: FavoriteCity) => {
+  const addFavorite = (city: CityOptions) => {
     if (!favorites.value.some((f) => f.id === city.id)) {
       favorites.value.push(city)
       saveFavorites()
@@ -28,7 +28,9 @@ export const useFavoritesStore = defineStore('favorites', () => {
   }
 
   const hasFavorite = (lat: number, lon: number) => {
-    return favorites.value.some((fav) => fav.lat === lat && fav.lon === lon)
+    return favorites.value.some(
+      (fav) => fav.lat?.toFixed(3) === lat?.toFixed(3) && fav.lon?.toFixed(3) === lon?.toFixed(3),
+    )
   }
 
   return {

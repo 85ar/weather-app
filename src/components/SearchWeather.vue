@@ -41,6 +41,10 @@
           @click="detectLocation"
           :disabled="isDetectingLocation"
           class="px-6 py-2 sm:px-4 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+          v-tippy="{
+            content: 'Автоопределение местоположения',
+            placement: 'top',
+          }"
         >
           <Navigation class="w-4 h-4" />
           <span class="hidden sm:block">{{ isDetectingLocation ? '...' : 'Авто' }}</span>
@@ -50,6 +54,10 @@
           v-if="Object.keys(activeCity).length"
           @click="updateData()"
           class="px-6 py-2 sm:px-4 sm:py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition cursor-pointer flex items-center gap-2"
+          v-tippy="{
+            content: 'Обновить данные',
+            placement: 'top',
+          }"
         >
           <RotateCcw class="w-4 h-4" />
         </button>
@@ -59,6 +67,10 @@
           @click="addFavoriteCity()"
           class="px-6 py-2 sm:px-4 sm:py-2 text-gray-500 rounded-lg hover:bg-green-600 transition cursor-pointer flex items-center gap-2"
           :class="isFavorite ? 'bg-green-500 text-white' : 'bg-gray-300 '"
+          v-tippy="{
+            content: 'Добавить в Избранное',
+            placement: 'top',
+          }"
         >
           <Heart class="w-4 h-4" />
         </button>
@@ -79,13 +91,15 @@ import { useWeatherStore } from '../stores/weatherStore'
 import { X, Navigation, Heart, User, RotateCcw } from 'lucide-vue-next'
 import { useDetectLocation } from '../composable/useDetectLocation'
 import { useToast } from 'vue-toastification'
-import { onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useFavorites } from '../composable/useFavorites'
 import { useSearchStore } from '../stores/searchStore'
 import type { CityOptions } from '../stores/types'
+import { useDefaultsStore } from '../stores/defaultsStore'
 
 const storeWeather = useWeatherStore()
 const storeSearch = useSearchStore()
+const storeDefaults = useDefaultsStore()
 
 const highlightedIndex = ref(-1)
 
@@ -194,8 +208,18 @@ const addFavoriteCity = () => {
 
 const updateData = () => {
   searchWeather(activeCity.value)
-  toast.info('Данные о погоде обновлены')
 }
+
+onMounted(() => {
+  storeDefaults.loadDefaults()
+
+  // if (storeDefaults.defaultCity) {
+  //   letter.value = storeDefaults.defaultCity.name
+  //   searchWeather(storeDefaults.defaultCity)
+  // }
+
+  if (Object.keys(storeWeather.activeCity).length) updateData()
+})
 
 onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)

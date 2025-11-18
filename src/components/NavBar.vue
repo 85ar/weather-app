@@ -23,14 +23,6 @@
                 : 'text-gray-600 hover:bg-blue-50',
               isCompact && 'justify-center',
             ]"
-            v-tippy="
-              isCompact
-                ? {
-                    content: item.label,
-                    placement: 'right',
-                  }
-                : {}
-            "
           >
             <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
             <span v-if="!isCompact" class="whitespace-nowrap">
@@ -54,14 +46,6 @@
                 : 'text-gray-600 hover:bg-blue-50',
               isCompact && 'justify-center',
             ]"
-            v-tippy="
-              isCompact
-                ? {
-                    content: 'Настройки',
-                    placement: 'right',
-                  }
-                : {}
-            "
           >
             <Settings class="w-5 h-5" />
             <span v-if="!isCompact">Настройки</span>
@@ -73,14 +57,6 @@
             @click="logout"
             class="flex items-center gap-3 p-3 w-full text-left text-red-500 hover:bg-red-50 rounded-xl transition"
             :class="[isCompact && 'justify-center']"
-            v-tippy="
-              isCompact
-                ? {
-                    content: 'Выход',
-                    placement: 'right',
-                  }
-                : {}
-            "
           >
             <LogOut class="w-5 h-5" />
             <span v-if="!isCompact" aria-label="Выход">Выход</span>
@@ -94,7 +70,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { CloudSunRain, House, Map, MapPinCheck, BookHeart, Settings, LogOut } from 'lucide-vue-next'
+import { CloudSunRain, House, Map, BookHeart, Settings, LogOut } from 'lucide-vue-next'
 
 const route = useRoute()
 const isCompact = ref(false)
@@ -103,7 +79,6 @@ const menu = [
   { label: 'Дашборд', to: '/', icon: House },
   { label: 'Карта', to: '/map', icon: Map },
   { label: 'Избранное', to: '/favorite', icon: BookHeart },
-  { label: 'Моя локация', to: '/location', icon: MapPinCheck },
 ]
 
 const logout = () => {

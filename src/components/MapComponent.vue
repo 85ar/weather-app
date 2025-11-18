@@ -55,6 +55,7 @@ const storeFavorites = useFavoritesStore()
 const { favorites } = storeToRefs(storeFavorites)
 
 const { isFavorite, add } = useFavorites()
+
 const toast = useToast()
 
 // Фокус на выбранный город
@@ -63,7 +64,7 @@ const focusCity = (fav: any) => {
   if (!map.value) return
   map.value.flyTo([fav.lat, fav.lon], 10, { duration: 1.2 })
 
-  const popupContent = `<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`
+  const popupContent = `<b>${fav.name}</b><br>${fav.country}`
 
   // Закрываем предыдущий popup
   favoriteMarkers.value.forEach((marker) => marker.closePopup())
@@ -111,7 +112,7 @@ onMounted(() => {
       if (fav.lat && fav.lon) {
         const marker = L.marker([fav.lat, fav.lon])
           .addTo(map.value! as LMap)
-          .bindPopup(`<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`)
+          .bindPopup(`<b>${fav.name}</b><br>${fav.country}`)
         favoriteMarkers.value.push(marker)
       }
     })
@@ -129,7 +130,7 @@ watch(favorites, () => {
     if (fav.lat && fav.lon) {
       const marker = L.marker([fav.lat, fav.lon])
         .addTo(map.value! as LMap)
-        .bindPopup(`<b>${fav.name}</b><br>${fav.country}<br>${Math.round(fav.temp_c)}°C`)
+        .bindPopup(`<b>${fav.name}</b><br>${fav.country}`)
       favoriteMarkers.value.push(marker)
     }
   })

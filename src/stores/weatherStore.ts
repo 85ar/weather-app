@@ -25,12 +25,14 @@ export const useWeatherStore = defineStore('weather', () => {
     activeDay.value = date
   }
 
-  const fetchForecastWeatherByCity = async () => {
+  const fetchForecastWeatherByCity = async (city?: string) => {
     loading.value = true
     error.value = null
     clearWeatherData()
     try {
-      const result = await getForecastWeatherByCity(activeCity.value.name)
+      const result = city
+        ? await getForecastWeatherByCity(city)
+        : await getForecastWeatherByCity(activeCity.value.name)
 
       current.value = result.current
       forecast.value = result.forecast
@@ -48,14 +50,14 @@ export const useWeatherStore = defineStore('weather', () => {
     error.value = null
     try {
       const result = await getForecastWeatherByCoords(latitude, longitude)
-      setActiveCity({
-        id: result.location.id,
-        name: result.location.name,
-        country: result.location.country,
-        region: result.location.region,
-        lat: result.location.lat,
-        lon: result.location.lon,
-      })
+       setActiveCity({
+         id: `${result.location.lat.toFixed(2)}_${result.location.lon.toFixed(2)}`,
+         name: result.location.name,
+         country: result.location.country,
+         region: result.location.region,
+         lat: result.location.lat,
+         lon: result.location.lon,
+       })
       current.value = result.current
       forecast.value = result.forecast
       location.value = result.location

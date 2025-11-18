@@ -56,7 +56,7 @@ export interface HourData {
 }
 
 export interface CityOptions {
-  id: number
+  id: string
   name: string
   country: string
   region: string
@@ -64,15 +64,3 @@ export interface CityOptions {
   lon: number
 }
 
-export interface FavoriteCity {
-  id: string
-  name: string
-  country: string
-  lat: number
-  lon: number
-  temp_c: number
-  condition: {
-    text: string
-    icon: string
-  }
-}
