@@ -81,7 +81,12 @@ const showCityMap = () => {
 
 const showCityWeather = () => {
   storeWeather.setActiveCity(props.favorite)
-  router.push('/')
+  router.push({
+    path: '/',
+    query: {
+      city: props.favorite.name,
+    },
+  })
 }
 
 const { remove } = useFavorites()
