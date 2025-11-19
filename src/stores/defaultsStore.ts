@@ -6,36 +6,43 @@ import { getCityBySearch } from '../api/service'
 export const useDefaultsStore = defineStore('defaults', () => {
   const defaultCity = ref<CityOptions>({} as CityOptions)
 
-  const loadDefaults = () => {
-    const data = localStorage.getItem('defaults')
-    defaultCity.value = data ? JSON.parse(data) : {}
-  }
+const isSavingDefault = ref<boolean>(false)
 
-  const saveDefaults = (city: CityOptions) => {
-    localStorage.setItem('defaults', JSON.stringify(city))
-  }
+const loadDefaults = () => {
+  const data = localStorage.getItem('defaults')
+  defaultCity.value = data ? JSON.parse(data) : {}
+}
 
-  const fetchCityBySearchDefault = async (city: string) => {
-    try {
-      const result = await getCityBySearch(city)
-      defaultCity.value = {
-        id: `${result[0].lat}_${result[0].lon}`,
-        name: result[0].name,
-        country: result[0].country,
-        region: result[0].region,
-        lat: result[0].lat,
-        lon: result[0].lon,
-      }
-      saveDefaults(defaultCity.value)
-    } catch (error) {
-      console.error(error)
+const saveDefaults = (city: CityOptions) => {
+  localStorage.setItem('defaults', JSON.stringify(city))
+}
+
+const fetchCityBySearchDefault = async (city: string) => {
+  isSavingDefault.value = true
+  try {
+    const result = await getCityBySearch(city)
+    const newCity = result[0]
+    defaultCity.value = {
+      id: `${newCity.lat}_${newCity.lon}`,
+      name: newCity.name,
+      country: newCity.country,
+      region: newCity.region,
+      lat: newCity.lat,
+      lon: newCity.lon,
     }
+    saveDefaults(defaultCity.value)
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isSavingDefault.value = false
   }
+}
 
   return {
     loadDefaults,
     saveDefaults,
     defaultCity,
     fetchCityBySearchDefault,
+    isSavingDefault,
   }
 })

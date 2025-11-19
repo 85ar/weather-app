@@ -40,6 +40,16 @@ import { useRoute } from 'vue-router'
 import { HeartPlus } from 'lucide-vue-next'
 import { useFavorites } from '../composable/useFavorites'
 import { useToast } from 'vue-toastification'
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+})
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 const map = ref<LMap | null>(null)

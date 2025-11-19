@@ -11,6 +11,7 @@ import { onMounted, onUnmounted } from 'vue'
 import NavBar from './components/NavBar.vue'
 import { hideAll } from 'tippy.js'
 import { useFavoritesStore } from './stores/favoritesStore'
+import '../src/assets/styles.scss'
 
 const hide = () => hideAll()
 const storeFavorites = useFavoritesStore()
